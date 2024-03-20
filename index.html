@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3/30園遊會系統</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    input {
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    #outputText {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #adminPanel {
+      border: 1px solid #ccc;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+    }
+
+    #logList {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .logItem {
+      margin-bottom: 5px;
+    }
+
+    #clearButton {
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    #clearButton:hover {
+      background-color: #0056b3;
+    }
+    .title {
+      color:fff
+    }
+  </style>
+</head>
+<body>
+  <input type="button" value="管理介面" onclick="location.href='unlock-1.html'">
+  <input type="text" id="textInput" placeholder="請感應電子支付">
+  <div id="outputText"></div>
+
+  <div id="adminPanel">
+    <h2>管理後台</h2>
+    <button id="clearButton">清除日誌</button>
+    <ul id="logList"></ul>
+  </div>
+
+  <script>
+    document.getElementById('textInput').addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        var inputText = this.value.trim().toLowerCase();
+
+        if (inputText === 'open') {
+          window.open('https://i-like-dev.github.io/wrong/open.html', '_blank');
+          return;
+        }
+
+        var voiceMap = {
+          '0001692131': '授權成功，本次遊玩已記錄成功。',
+        };
+
+        if (voiceMap.hasOwnProperty(inputText)) {
+          var voiceText = voiceMap[inputText];
+          var synth = window.speechSynthesis;
+          var utterance = new SpeechSynthesisUtterance(voiceText);
+          var outputText = document.getElementById('outputText');
+          outputText.innerText = voiceText;
+
+          utterance.onend = function () {
+            outputText.innerText = '';
+          };
+
+          synth.speak(utterance);
+          updateAdminPanel(inputText);
+        } else {
+          alert('找不到該筆資料');
+        }
+
+        this.value = '';
+      }
+    });
+
+    function updateAdminPanel(user) {
+      var logList = document.getElementById('logList');
+      var logItem = document.createElement('li');
+      logItem.className = 'logItem';
+      logItem.innerText = user + ' 在 ' + getCurrentTime() + ' 玩了遊戲';
+      logList.insertBefore(logItem, logList.firstChild);
+
+      saveLogToLocalStorage(logItem.innerText);
+    }
+
+    document.getElementById('clearButton').addEventListener('click', function () {
+      var logList = document.getElementById('logList');
+      logList.innerHTML = '';
+      localStorage.removeItem('logs');
+    });
+
+    function saveLogToLocalStorage(log) {
+      var logs = localStorage.getItem('logs') ? JSON.parse(localStorage.getItem('logs')) : [];
+      logs.push(log);
+      localStorage.setItem('logs', JSON.stringify(logs));
+    }
+
+    function loadLogsFromLocalStorage() {
+      var logs = localStorage.getItem('logs') ? JSON.parse(localStorage.getItem('logs')) : [];
+      var logList = document.getElementById('logList');
+      logs.forEach(function(log) {
+        var logItem = document.createElement('li');
+        logItem.className = 'logItem';
+        logItem.innerText = log;
+        logList.appendChild(logItem);
+      });
+    }
+
+    function getCurrentTime() {
+      var now = new Date();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var seconds = now.getSeconds();
+      return hours + ':' + minutes + ':' + seconds;
+    }
+
+    loadLogsFromLocalStorage();
+  </script>
+
+  <p>請刷卡後再進入！</p>
+  <p>系統提醒您，等聽到「滴....」時，即可進入</p>
+</body>
+</html>
